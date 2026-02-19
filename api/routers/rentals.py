@@ -4,7 +4,7 @@ from uuid import UUID
 from api.factories import rental_service_factory
 from services.interfaces.rental_service_interface import IRentalService
 from api.schemas.rental_schemas import RentalCreate, RentalResponse
-from api.common.exceptions import NotFoundException, CarStatusUnavailableException, RentalAlreadyEndedException, DatabaseException, InputValidationException
+from common.exceptions import NotFoundException, CarStatusUnavailableException, RentalAlreadyEndedException, DatabaseException, InputValidationException
 
 router = APIRouter(prefix="/rentals", tags=["rentals"])
 

@@ -6,7 +6,7 @@ from db.car_model import Car, CarStatus
 from datetime import datetime, timezone
 
 from repositories.interfaces.car_repository_interface import ICarRepository
-from api.common.exceptions import DatabaseException
+from common.exceptions import DatabaseException
 
 class CarRepository(ICarRepository):
     def __init__(self, db: Session):

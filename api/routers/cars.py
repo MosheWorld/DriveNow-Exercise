@@ -5,7 +5,7 @@ from db.car_model import CarStatus
 from api.factories import car_service_factory
 from services.interfaces.car_service_interface import ICarService
 from api.schemas.car_schemas import CarCreate, CarResponse, CarUpdate
-from api.common.exceptions import NotFoundException, DatabaseException, InputValidationException
+from common.exceptions import NotFoundException, DatabaseException, InputValidationException
 
 router = APIRouter(prefix="/cars", tags=["cars"])
 

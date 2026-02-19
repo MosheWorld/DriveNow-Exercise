@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from db.car_model import CarStatus, Car
 from services.interfaces.car_service_interface import ICarService
 from repositories.interfaces.car_repository_interface import ICarRepository
-from api.common.exceptions import NotFoundException, InputValidationException
+from common.exceptions import NotFoundException, InputValidationException
 
 MIN_CAR_YEAR = 1950
 

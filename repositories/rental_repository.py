@@ -6,7 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from db.rental_model import Rental
 
 from repositories.interfaces.rental_repository_interface import IRentalRepository
-from api.common.exceptions import DatabaseException
+from common.exceptions import DatabaseException
 
 class RentalRepository(IRentalRepository):
     def __init__(self, db: Session):
