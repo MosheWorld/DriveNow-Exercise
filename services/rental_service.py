@@ -6,7 +6,7 @@ from db.rental_model import Rental
 from services.interfaces.rental_service_interface import IRentalService
 from repositories.interfaces.rental_repository_interface import IRentalRepository
 from repositories.interfaces.car_repository_interface import ICarRepository
-from fastapi import HTTPException, status
+from api.common.exceptions import NotFoundException, CarStatusUnavailableException, RentalAlreadyEndedException
 
 class RentalService(IRentalService):
     def __init__(self, rental_repository: IRentalRepository, car_repository: ICarRepository):
@@ -20,10 +20,10 @@ class RentalService(IRentalService):
         car = self.car_repository.get_by_id(car_id)
         
         if not car:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Car not found")
+            raise NotFoundException(f"Car {car_id} not found")
         
         if car.status != CarStatus.AVAILABLE:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Car is not available for rent")
+            raise CarStatusUnavailableException("Car is not available for rent")
 
         new_rental = self.rental_repository.create(car_id=car_id, customer_name=customer_name)
         car.status = CarStatus.IN_USE
@@ -34,10 +34,10 @@ class RentalService(IRentalService):
     def end_rental(self, rental_id: UUID) -> Rental:
         rental = self.rental_repository.get_by_id(rental_id)
         if not rental:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Rental not found")
+            raise NotFoundException(f"Rental {rental_id} not found")
         
         if rental.end_date:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Rental already ended")
+            raise RentalAlreadyEndedException("Rental already ended")
 
         self.rental_repository.end_rental(rental)
         

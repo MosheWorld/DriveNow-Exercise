@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from db.car_model import CarStatus, Car
 from services.interfaces.car_service_interface import ICarService
 from repositories.interfaces.car_repository_interface import ICarRepository
+from api.common.exceptions import NotFoundException
 
 class CarService(ICarService):
     def __init__(self, repository: ICarRepository):
@@ -21,7 +22,7 @@ class CarService(ICarService):
     def update_car(self, car_id: UUID, model: Optional[str] = None, year: Optional[int] = None, status: Optional[CarStatus] = None) -> Optional[Car]:
         car = self.repository.get_by_id(car_id)
         if not car:
-            return None
+            raise NotFoundException(f"Car {car_id} not found")
             
         if model:
             car.model = model
