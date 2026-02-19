@@ -7,14 +7,10 @@ from api.schemas.rental_schemas import RentalCreate, RentalResponse
 
 router = APIRouter(prefix="/rentals", tags=["rentals"])
 
-@router.get("", response_model=List[RentalResponse])
-def get_rentals(service: IRentalService = Depends(rental_service_factory)):
-    return service.get_all_rentals()
-
 @router.post("", response_model=RentalResponse, status_code=status.HTTP_201_CREATED)
 def create_rental(rental: RentalCreate, service: IRentalService = Depends(rental_service_factory)):
     return service.create_rental(car_id=rental.car_id, customer_name=rental.customer_name)
 
-@router.post("/{rental_id}/end-rental", response_model=RentalResponse)
+@router.patch("/{rental_id}/end-rental", response_model=RentalResponse)
 def end_rental(rental_id: UUID, service: IRentalService = Depends(rental_service_factory)):
     return service.end_rental(rental_id)

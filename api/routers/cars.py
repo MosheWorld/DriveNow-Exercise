@@ -8,10 +8,6 @@ from api.schemas.car_schemas import CarCreate, CarResponse, CarUpdate
 
 router = APIRouter(prefix="/cars", tags=["cars"])
 
-@router.get("", response_model=List[CarResponse])
-def get_cars(status: Optional[CarStatus] = None, service: ICarService = Depends(car_service_factory)):
-    return service.get_all_cars(status)
-
 @router.post("", response_model=CarResponse, status_code=status.HTTP_201_CREATED)
 def create_car(car: CarCreate, service: ICarService = Depends(car_service_factory)):
     return service.create_car(model=car.model, year=car.year, status=car.status)
@@ -23,3 +19,7 @@ def update_car(car_id: UUID, car_update: CarUpdate, service: ICarService = Depen
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Car not found")
 
     return updated_car
+
+@router.get("", response_model=List[CarResponse])
+def get_cars(status: Optional[CarStatus] = None, service: ICarService = Depends(car_service_factory)):
+    return service.get_all_cars(status)
