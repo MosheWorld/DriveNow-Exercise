@@ -2,6 +2,7 @@ from typing import List, Optional
 from uuid import UUID
 from sqlalchemy.orm import Session
 from db.car_model import Car, CarStatus
+from datetime import datetime, timezone
 
 class CarRepository:
     def __init__(self, db: Session):
@@ -24,6 +25,7 @@ class CarRepository:
         return car
 
     def update(self, car: Car) -> Car:
+        car.updated_at = datetime.now(timezone.utc)
         self.db.add(car)
         self.db.commit()
         self.db.refresh(car)

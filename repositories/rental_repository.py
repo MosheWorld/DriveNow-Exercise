@@ -23,6 +23,7 @@ class RentalRepository:
 
     def end_rental(self, rental: Rental) -> Rental:
         rental.end_date = datetime.now(timezone.utc)
+        rental.updated_at = datetime.now(timezone.utc)
         self.db.commit()
         self.db.refresh(rental)
         return rental
