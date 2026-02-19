@@ -3,14 +3,15 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 from db.car_model import CarStatus
 from db.rental_model import Rental
-from repositories.rental_repository import RentalRepository
-from repositories.car_repository import CarRepository
+from services.interfaces.rental_service_interface import IRentalService
+from repositories.interfaces.rental_repository_interface import IRentalRepository
+from repositories.interfaces.car_repository_interface import ICarRepository
 from fastapi import HTTPException, status
 
-class RentalService:
-    def __init__(self, db: Session):
-        self.rental_repository = RentalRepository(db)
-        self.car_repository = CarRepository(db)
+class RentalService(IRentalService):
+    def __init__(self, rental_repository: IRentalRepository, car_repository: ICarRepository):
+        self.rental_repository = rental_repository
+        self.car_repository = car_repository
 
     def get_all_rentals(self) -> List[Rental]:
         return self.rental_repository.get_all()

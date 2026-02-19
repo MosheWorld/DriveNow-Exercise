@@ -4,7 +4,9 @@ from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 from db.rental_model import Rental
 
-class RentalRepository:
+from repositories.interfaces.rental_repository_interface import IRentalRepository
+
+class RentalRepository(IRentalRepository):
     def __init__(self, db: Session):
         self.db = db
 

@@ -2,11 +2,12 @@ from typing import List, Optional
 from uuid import UUID
 from sqlalchemy.orm import Session
 from db.car_model import CarStatus, Car
-from repositories.car_repository import CarRepository
+from services.interfaces.car_service_interface import ICarService
+from repositories.interfaces.car_repository_interface import ICarRepository
 
-class CarService:
-    def __init__(self, db: Session):
-        self.repository = CarRepository(db)
+class CarService(ICarService):
+    def __init__(self, repository: ICarRepository):
+        self.repository = repository
 
     def get_all_cars(self, status: Optional[CarStatus] = None) -> List[Car]:
         return self.repository.get_all(status)

@@ -4,7 +4,9 @@ from sqlalchemy.orm import Session
 from db.car_model import Car, CarStatus
 from datetime import datetime, timezone
 
-class CarRepository:
+from repositories.interfaces.car_repository_interface import ICarRepository
+
+class CarRepository(ICarRepository):
     def __init__(self, db: Session):
         self.db = db
 
