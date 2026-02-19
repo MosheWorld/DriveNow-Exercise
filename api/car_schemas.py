@@ -19,3 +19,8 @@ class CarResponse(BaseModel):
     
     class Config:
         from_attributes = True
+
+class CarUpdate(BaseModel):
+    model: Optional[str] = None
+    year: Optional[int] = None
+    status: Optional[CarStatus] = None
