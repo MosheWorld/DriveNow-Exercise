@@ -1,9 +1,9 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from db.database import get_db, engine, Base
-from db.models import CarStatus
-from repositories.car_repository import CarRepository
-from repositories.rental_repository import RentalRepository
+from db.car_model import CarStatus
+from services.car_service import CarService
+from services.rental_service import RentalService
 from typing import List
 from .car_schemas import CarCreate, CarResponse
 from .rental_schemas import RentalCreate, RentalResponse
@@ -14,36 +14,24 @@ app = FastAPI()
 
 @app.get("/cars", response_model=List[CarResponse])
 def get_cars(db: Session = Depends(get_db)):
-    repo = CarRepository(db)
-    return repo.get_all()
+    service = CarService(db)
+    return service.get_all_cars()
 
 @app.get("/rentals", response_model=List[RentalResponse])
 def get_rentals(db: Session = Depends(get_db)):
-    repo = RentalRepository(db)
-    return repo.get_all()
+    service = RentalService(db)
+    return service.get_all_rentals()
 
 @app.post("/cars", response_model=CarResponse)
 def create_car(car: CarCreate, db: Session = Depends(get_db)):
-    repo = CarRepository(db)
-    return repo.create(model=car.model, year=car.year, status=car.status)
+    service = CarService(db)
+    return service.create_car(model=car.model, year=car.year, status=car.status)
 
 @app.post("/rentals", response_model=RentalResponse)
 def create_rental(rental: RentalCreate, db: Session = Depends(get_db)):
-    car_repo = CarRepository(db)
-    car = car_repo.get_by_id(rental.car_id)
-    
-    if not car:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Car not found")
-    
-    if car.status != CarStatus.AVAILABLE:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Car is not available for rent")
+    service = RentalService(db)
+    return service.create_rental(car_id=rental.car_id, customer_name=rental.customer_name)
 
-    rental_repo = RentalRepository(db)
-    new_rental = rental_repo.create(car_id=rental.car_id, customer_name=rental.customer_name)
-    car.status = CarStatus.IN_USE
-    db.commit()
-    
-    return new_rental
 
 if __name__ == "__main__":
     import uvicorn
