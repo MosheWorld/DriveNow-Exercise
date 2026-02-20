@@ -1,12 +1,10 @@
-import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import Mock
 from uuid import uuid4
 from datetime import datetime, timezone
 from api.api import app
-from api.factories import get_db, car_service_factory, rental_service_factory
+from api.factories import get_db, rental_service_factory
 from db.rental_model import Rental
-from services.rental_service import RentalService
 from services.interfaces.rental_service_interface import IRentalService
 from services.interfaces.car_service_interface import ICarService
 

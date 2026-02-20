@@ -9,6 +9,12 @@ logger = Logger()
 
 @router.get("")
 async def get_metrics() -> Response:
+    """
+    Retrieve aggregated, real-time system metrics.
+
+    Merges internal API HTTP metrics with real-time business metrics fetched 
+    from the background RabbitMQ worker service.
+    """
     api_metrics = generate_latest().decode("utf-8")
     
     worker_metrics = ""

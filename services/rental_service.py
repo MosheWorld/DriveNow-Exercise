@@ -1,6 +1,5 @@
 from typing import List
 from uuid import UUID
-from sqlalchemy.orm import Session
 from db.car_model import CarStatus
 from db.rental_model import Rental
 from services.interfaces.rental_service_interface import IRentalService

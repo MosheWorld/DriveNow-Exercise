@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, status, HTTPException
-from typing import List
 from uuid import UUID
 from api.factories import rental_service_factory
 from services.interfaces.rental_service_interface import IRentalService
@@ -12,6 +11,12 @@ logger = Logger()
 
 @router.post("", response_model=RentalResponse, status_code=status.HTTP_201_CREATED)
 def create_rental(rental: RentalCreate, service: IRentalService = Depends(rental_service_factory)):
+    """
+    Initiate a new car rental session for a customer.
+
+    Requires a valid 'available' car. Automatically updates the car's state 
+    to 'in_use' and triggers an asynchronous event for metrics tracking.
+    """
     try:
         return service.create_rental(car_id=rental.car_id, customer_name=rental.customer_name)
     except InputValidationException as e:
@@ -29,6 +34,12 @@ def create_rental(rental: RentalCreate, service: IRentalService = Depends(rental
 
 @router.patch("/{car_id}/end-rental", response_model=RentalResponse)
 def end_rental_by_car_id(car_id: UUID, service: IRentalService = Depends(rental_service_factory)):
+    """
+    Terminate an active rental session.
+
+    Finalizes the rental record for the specified car and sets the car's 
+    status back to 'available' for future customers.
+    """
     try:
         return service.end_rental_by_car_id(car_id)
     except InputValidationException as e:

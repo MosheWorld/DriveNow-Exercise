@@ -9,10 +9,6 @@ class ICarService(ABC):
         pass
 
     @abstractmethod
-    def get_car_by_id(self, car_id: UUID) -> Optional[Car]:
-        pass
-
-    @abstractmethod
     def create_car(self, model: str, year: int, status: CarStatus = CarStatus.AVAILABLE) -> Car:
         pass
 

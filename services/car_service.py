@@ -1,6 +1,5 @@
 from typing import List, Optional
 from uuid import UUID
-from sqlalchemy.orm import Session
 from db.car_model import CarStatus, Car
 from services.interfaces.car_service_interface import ICarService
 from repositories.interfaces.car_repository_interface import ICarRepository
@@ -19,9 +18,6 @@ class CarService(ICarService):
 
     def get_all_cars(self, status: Optional[CarStatus] = None) -> List[Car]:
         return self.repository.get_all(status)
-
-    def get_car_by_id(self, car_id: UUID) -> Optional[Car]:
-        return self.repository.get_by_id(car_id)
 
     def create_car(self, model: str, year: int, status: CarStatus = CarStatus.AVAILABLE) -> Car:
         self.logger.info(f"Creating car: {model} ({year})")

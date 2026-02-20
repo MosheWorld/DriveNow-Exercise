@@ -1,4 +1,3 @@
-import json
 import pika
 from common.interfaces.message_publisher_interface import IMessagePublisher
 from common.interfaces.logger_interface import ILogger

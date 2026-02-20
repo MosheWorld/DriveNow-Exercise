@@ -9,10 +9,6 @@ class IRentalRepository(ABC):
         pass
 
     @abstractmethod
-    def get_by_id(self, rental_id: UUID) -> Optional[Rental]:
-        pass
-
-    @abstractmethod
     def create(self, car_id: UUID, customer_name: str) -> Rental:
         pass
 

@@ -18,12 +18,6 @@ class RentalRepository(IRentalRepository):
         except SQLAlchemyError as e:
             raise DatabaseException(f"Error retrieving rentals: {e}", original_exception=e)
 
-    def get_by_id(self, rental_id: UUID) -> Optional[Rental]:
-        try:
-            return self.db.query(Rental).filter(Rental.id == rental_id).first()
-        except SQLAlchemyError as e:
-            raise DatabaseException(f"Error retrieving rental by ID {rental_id}: {e}", original_exception=e)
-
     def create(self, car_id: UUID, customer_name: str) -> Rental:
         try:
             rental = Rental(car_id=car_id, customer_name=customer_name)
