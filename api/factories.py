@@ -7,12 +7,15 @@ from services.car_service import CarService
 from services.rental_service import RentalService
 from services.interfaces.car_service_interface import ICarService
 from services.interfaces.rental_service_interface import IRentalService
+from common.logger import Logger
 
 def car_service_factory(db: Session = Depends(get_db)) -> ICarService:
+    logger = Logger()
     repository = CarRepository(db)
-    return CarService(repository)
+    return CarService(logger, repository)
 
 def rental_service_factory(db: Session = Depends(get_db)) -> IRentalService:
+    logger = Logger()
     rental_repo = RentalRepository(db)
     car_repo = CarRepository(db)
-    return RentalService(rental_repo, car_repo)
+    return RentalService(logger, rental_repo, car_repo)

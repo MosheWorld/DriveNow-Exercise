@@ -9,7 +9,7 @@ from repositories.interfaces.car_repository_interface import ICarRepository
 from common.exceptions import DatabaseException
 
 class CarRepository(ICarRepository):
-    def __init__(self, db: Session):
+    def __init__(self, db: Session) -> None:
         self.db = db
 
     def get_all(self, status: Optional[CarStatus] = None) -> List[Car]:

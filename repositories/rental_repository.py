@@ -9,7 +9,7 @@ from repositories.interfaces.rental_repository_interface import IRentalRepositor
 from common.exceptions import DatabaseException
 
 class RentalRepository(IRentalRepository):
-    def __init__(self, db: Session):
+    def __init__(self, db: Session) -> None:
         self.db = db
 
     def get_all(self) -> List[Rental]:

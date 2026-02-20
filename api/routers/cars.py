@@ -6,8 +6,10 @@ from api.factories import car_service_factory
 from services.interfaces.car_service_interface import ICarService
 from api.schemas.car_schemas import CarCreate, CarResponse, CarUpdate
 from common.exceptions import NotFoundException, DatabaseException, InputValidationException
+from common.logger import Logger
 
 router = APIRouter(prefix="/cars", tags=["cars"])
+logger = Logger()
 
 @router.post("", response_model=CarResponse, status_code=status.HTTP_201_CREATED)
 def create_car(car: CarCreate, service: ICarService = Depends(car_service_factory)):
@@ -16,8 +18,10 @@ def create_car(car: CarCreate, service: ICarService = Depends(car_service_factor
     except InputValidationException as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except DatabaseException as e:
+        logger.error(f"Database error creating car: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
     except Exception as e:
+        logger.critical(f"Unexpected error creating car: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="An unexpected error occurred")
 
 @router.put("/{car_id}", response_model=CarResponse)
@@ -29,8 +33,10 @@ def update_car(car_id: UUID, car_update: CarUpdate, service: ICarService = Depen
     except NotFoundException as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except DatabaseException as e:
+        logger.error(f"Database error updating car {car_id}: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
     except Exception as e:
+        logger.critical(f"Unexpected error updating car {car_id}: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="An unexpected error occurred")
 
 @router.get("", response_model=List[CarResponse])
@@ -38,6 +44,8 @@ def get_cars(status: Optional[CarStatus] = None, service: ICarService = Depends(
     try:
         return service.get_all_cars(status)
     except DatabaseException as e:
+        logger.error(f"Database error retrieving cars: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
     except Exception as e:
+        logger.critical(f"Unexpected error retrieving cars: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="An unexpected error occurred")
