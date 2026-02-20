@@ -8,7 +8,7 @@ from services.rental_service import RentalService
 from repositories.interfaces.car_repository_interface import ICarRepository
 from repositories.interfaces.rental_repository_interface import IRentalRepository
 from common.interfaces.message_publisher_interface import IMessagePublisher
-import common.constants as constants
+import common.messaging.messaging_constants as constants
 from common.interfaces.logger_interface import ILogger
 
 @pytest.fixture

@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import Dict, Any
-from common.constants import KEY_EVENT_TYPE, KEY_PAYLOAD
+from common.messaging.messaging_constants import KEY_EVENT_TYPE, KEY_PAYLOAD
 import json
 
 class MessageEvent(BaseModel):

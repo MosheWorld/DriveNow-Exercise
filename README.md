@@ -83,7 +83,7 @@ I think PostgreSQL is a better choice than a NoSQL database for this project for
 ## How to Run the Project
 
 ```bash
-docker-compose up -d
+docker-compose up -d --build
 ```
 
 All dependencies, the database, the message broker, the metrics worker, and the core API will automatically build and start inside docker containers.

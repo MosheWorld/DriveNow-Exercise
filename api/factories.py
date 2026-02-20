@@ -7,7 +7,7 @@ from services.car_service import CarService
 from services.rental_service import RentalService
 from services.interfaces.car_service_interface import ICarService
 from services.interfaces.rental_service_interface import IRentalService
-from common.rabbitmq_publisher import RabbitMQPublisher
+from common.messaging.rabbitmq_publisher import RabbitMQPublisher
 from common.logger import Logger
 
 def car_service_factory(db: Session = Depends(get_db)) -> ICarService:

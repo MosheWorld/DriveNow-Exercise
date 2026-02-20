@@ -7,7 +7,7 @@ from repositories.interfaces.car_repository_interface import ICarRepository
 from common.exceptions import NotFoundException, InputValidationException
 from common.interfaces.logger_interface import ILogger
 from common.interfaces.message_publisher_interface import IMessagePublisher
-import common.constants as constants
+import common.messaging.messaging_constants as constants
 
 MIN_CAR_YEAR = 1950
 

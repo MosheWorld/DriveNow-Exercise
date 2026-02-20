@@ -2,8 +2,8 @@ import json
 import pika
 from common.interfaces.message_publisher_interface import IMessagePublisher
 from common.interfaces.logger_interface import ILogger
-from common.constants import METRICS_QUEUE_NAME
-from common.message_schema import MessageEvent
+from common.messaging.messaging_constants import METRICS_QUEUE_NAME
+from common.messaging.message_schema import MessageEvent
 from common.config import settings
 
 class RabbitMQPublisher(IMessagePublisher):

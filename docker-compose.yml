@@ -48,7 +48,7 @@ services:
   metrics_worker:
     build: .
     container_name: drivenow_metrics_worker
-    command: python -m worker.main
+    command: python -m worker.metrics_worker
     environment:
       - PYTHONUNBUFFERED=1
       - RABBITMQ_HOST=rabbitmq
