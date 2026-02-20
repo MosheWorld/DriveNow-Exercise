@@ -23,10 +23,10 @@ def create_rental(rental: RentalCreate, service: IRentalService = Depends(rental
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="An unexpected error occurred")
 
-@router.patch("/{rental_id}/end-rental", response_model=RentalResponse)
-def end_rental(rental_id: UUID, service: IRentalService = Depends(rental_service_factory)):
+@router.patch("/{car_id}/end-rental", response_model=RentalResponse)
+def end_rental_by_car_id(car_id: UUID, service: IRentalService = Depends(rental_service_factory)):
     try:
-        return service.end_rental(rental_id)
+        return service.end_rental_by_car_id(car_id)
     except InputValidationException as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except NotFoundException as e:

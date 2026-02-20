@@ -45,3 +45,9 @@ class RentalRepository(IRentalRepository):
         except SQLAlchemyError as e:
             self.db.rollback()
             raise DatabaseException(f"Error ending rental {rental.id}: {e}", original_exception=e)
+
+    def get_active_rental_by_car_id(self, car_id: UUID) -> Optional[Rental]:
+        try:
+            return self.db.query(Rental).filter(Rental.car_id == car_id, Rental.end_date == None).first()
+        except SQLAlchemyError as e:
+            raise DatabaseException(f"Error retrieving active rental for car {car_id}: {e}", original_exception=e)

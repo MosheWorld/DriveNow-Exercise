@@ -19,3 +19,7 @@ class IRentalRepository(ABC):
     @abstractmethod
     def end_rental(self, rental: Rental) -> Rental:
         pass
+
+    @abstractmethod
+    def get_active_rental_by_car_id(self, car_id: UUID) -> Optional[Rental]:
+        pass

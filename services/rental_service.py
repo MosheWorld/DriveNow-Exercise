@@ -34,19 +34,21 @@ class RentalService(IRentalService):
 
         return new_rental
 
-    def end_rental(self, rental_id: UUID) -> Rental:
-        rental = self.rental_repository.get_by_id(rental_id)
-        if not rental:
-            raise NotFoundException(f"Rental {rental_id} not found")
-        
-        if rental.end_date:
+    def end_rental_by_car_id(self, car_id: UUID) -> Rental:
+        car = self.car_repository.get_by_id(car_id)
+        if not car:
+            raise NotFoundException(f"Car {car_id} not found")
+
+        active_rental = self.rental_repository.get_active_rental_by_car_id(car_id)
+        if not active_rental:
+            raise NotFoundException(f"No active rental found for car {car_id}")
+
+        if active_rental.end_date:
             raise RentalAlreadyEndedException("Rental already ended")
 
-        self.rental_repository.end_rental(rental)
+        self.rental_repository.end_rental(active_rental)
         
-        car = self.car_repository.get_by_id(rental.car_id)
-        if car:
-            car.status = CarStatus.AVAILABLE
-            self.car_repository.update(car)
+        car.status = CarStatus.AVAILABLE
+        self.car_repository.update(car)
             
-        return rental
+        return active_rental

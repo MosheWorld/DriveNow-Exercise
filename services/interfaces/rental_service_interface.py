@@ -13,5 +13,5 @@ class IRentalService(ABC):
         pass
 
     @abstractmethod
-    def end_rental(self, rental_id: UUID) -> Rental:
+    def end_rental_by_car_id(self, car_id: UUID) -> Rental:
         pass
