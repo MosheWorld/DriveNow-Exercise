@@ -1,15 +1,10 @@
-import enum
 from sqlalchemy import Column, Integer, String, Enum, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from .database import Base
 from datetime import datetime, timezone
 import uuid
-
-class CarStatus(enum.Enum):
-    AVAILABLE = "available"
-    IN_USE = "in_use"
-    MAINTENANCE = "under_maintenance"
+from domain.entities.car import CarStatus
 
 class Car(Base):
     __tablename__ = "cars"

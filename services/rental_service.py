@@ -1,7 +1,7 @@
 from typing import List
 from uuid import UUID
-from db.car_model import CarStatus
-from db.rental_model import Rental
+from domain.entities.car import CarStatus
+from domain.entities.rental import RentalEntity
 from services.interfaces.rental_service_interface import IRentalService
 from repositories.interfaces.rental_repository_interface import IRentalRepository
 from repositories.interfaces.car_repository_interface import ICarRepository
@@ -17,17 +17,16 @@ class RentalService(IRentalService):
         self.rental_repository = rental_repository
         self.car_repository = car_repository
 
-    async def get_all_rentals(self) -> List[Rental]:
+    async def get_all_rentals(self) -> List[RentalEntity]:
         return await self.rental_repository.get_all()
 
-    async def create_rental(self, car_id: UUID, customer_name: str) -> Rental:
+    async def create_rental(self, car_id: UUID, customer_name: str) -> RentalEntity:
         self.logger.info(f"Creating rental for car {car_id} by {customer_name}")
         if not customer_name or not customer_name.strip():
             self.logger.error("Attempted to create rental with empty customer name")
             raise InputValidationException(message="Customer name cannot be empty")
 
         car = await self.car_repository.get_by_id(car_id)
-        
         if not car:
             self.logger.error(f"Car {car_id} not found during rental creation")
             raise NotFoundException(f"Car {car_id} not found")
@@ -45,7 +44,7 @@ class RentalService(IRentalService):
         self.logger.info(f"Rental created successfully: {new_rental.id}")
         return new_rental
 
-    async def end_rental_by_car_id(self, car_id: UUID) -> Rental:
+    async def end_rental_by_car_id(self, car_id: UUID) -> RentalEntity:
         self.logger.info(f"Ending rental for car: {car_id}")
         car = await self.car_repository.get_by_id(car_id)
         if not car:

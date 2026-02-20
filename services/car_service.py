@@ -1,6 +1,6 @@
 from typing import List, Optional
 from uuid import UUID
-from db.car_model import CarStatus, Car
+from domain.entities.car import CarEntity, CarStatus
 from services.interfaces.car_service_interface import ICarService
 from repositories.interfaces.car_repository_interface import ICarRepository
 from common.exceptions import NotFoundException, InputValidationException
@@ -16,10 +16,10 @@ class CarService(ICarService):
         self.message_publisher = message_publisher
         self.repository = repository
 
-    async def get_all_cars(self, status: Optional[CarStatus] = None) -> List[Car]:
+    async def get_all_cars(self, status: Optional[CarStatus] = None) -> List[CarEntity]:
         return await self.repository.get_all(status)
 
-    async def create_car(self, model: str, year: int, status: CarStatus = CarStatus.AVAILABLE) -> Car:
+    async def create_car(self, model: str, year: int, status: CarStatus = CarStatus.AVAILABLE) -> CarEntity:
         self.logger.info(f"Creating car: {model} ({year})")
         if not model or not model.strip():
             self.logger.error("Attempted to create car with empty model")
@@ -38,7 +38,7 @@ class CarService(ICarService):
         if status == CarStatus.AVAILABLE:
             self.message_publisher.publish_event(constants.EVENT_CAR_CREATED_AVAILABLE, {})
 
-    async def update_car(self, car_id: UUID, model: Optional[str] = None, year: Optional[int] = None, status: Optional[CarStatus] = None) -> Optional[Car]:
+    async def update_car(self, car_id: UUID, model: Optional[str] = None, year: Optional[int] = None, status: Optional[CarStatus] = None) -> Optional[CarEntity]:
         self.logger.info(f"Updating car: {car_id}")
         if model is not None and not model.strip():
              self.logger.error("Attempted to update car with empty model")
@@ -61,7 +61,7 @@ class CarService(ICarService):
         self.logger.info(f"Car updated successfully: {updated_car.id}")
         return updated_car
 
-    def _update_car_attributes(self, car: Car, model: Optional[str], year: Optional[int], status: Optional[CarStatus]) -> None:
+    def _update_car_attributes(self, car: CarEntity, model: Optional[str], year: Optional[int], status: Optional[CarStatus]) -> None:
         if model:
             car.model = model
         if year:

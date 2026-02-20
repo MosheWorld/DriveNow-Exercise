@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from typing import List, Optional
 from uuid import UUID
-from db.car_model import CarStatus
+from domain.entities.car import CarStatus
 from api.factories import car_service_factory
 from services.interfaces.car_service_interface import ICarService
 from api.schemas.car_schemas import CarCreate, CarResponse, CarUpdate

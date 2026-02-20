@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 from typing import Optional
 from uuid import UUID
 from datetime import datetime
-from db.car_model import CarStatus
+from domain.entities.car import CarStatus
 
 class CarCreate(BaseModel):
     model: str = Field(..., min_length=2)

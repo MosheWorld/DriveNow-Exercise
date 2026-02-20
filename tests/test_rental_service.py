@@ -1,8 +1,8 @@
 import pytest
 from unittest.mock import AsyncMock, Mock
 from uuid import uuid4
-from db.car_model import Car, CarStatus
-from db.rental_model import Rental
+from domain.entities.car import CarEntity, CarStatus
+from domain.entities.rental import RentalEntity
 from common.exceptions import NotFoundException, CarStatusUnavailableException, InputValidationException, RentalAlreadyEndedException
 from services.rental_service import RentalService
 from repositories.interfaces.car_repository_interface import ICarRepository
@@ -51,10 +51,10 @@ async def test_create_rental_success(rental_service: RentalService, mock_car_rep
     """
     # Setup
     car_id = uuid4()
-    mock_car = Car(id=car_id, model="Kia", status=CarStatus.AVAILABLE)
+    mock_car = CarEntity(id=car_id, model="Kia", year=2021, status=CarStatus.AVAILABLE)
     mock_car_repo.get_by_id.return_value = mock_car
     
-    expected_rental = Rental(id=uuid4(), car_id=car_id, customer_name="Moshe Binieli")
+    expected_rental = RentalEntity(id=uuid4(), car_id=car_id, customer_name="Moshe Binieli")
     mock_rental_repo.create.return_value = expected_rental
 
     # Act
@@ -109,7 +109,7 @@ async def test_create_rental_car_not_available(rental_service: RentalService, mo
     """
     # Setup
     car_id = uuid4()
-    mock_car_repo.get_by_id.return_value = Car(id=car_id, model="Kia", status=CarStatus.IN_USE)
+    mock_car_repo.get_by_id.return_value = CarEntity(id=car_id, model="Kia", year=2021, status=CarStatus.IN_USE)
 
     # Act / Assert
     with pytest.raises(CarStatusUnavailableException) as exc_info:
@@ -124,7 +124,7 @@ async def test_get_all_rentals(rental_service: RentalService, mock_rental_repo: 
     Verifies that the service simply delegates to the repository correctly.
     """
     # Setup
-    mock_rentals = [Rental(id=uuid4(), car_id=uuid4(), customer_name="Moshe"), Rental(id=uuid4(), car_id=uuid4(), customer_name="Binieli")]
+    mock_rentals = [RentalEntity(id=uuid4(), car_id=uuid4(), customer_name="Moshe Binieli"), RentalEntity(id=uuid4(), car_id=uuid4(), customer_name="Moshe Binieli")]
     mock_rental_repo.get_all.return_value = mock_rentals
     
     # Act
@@ -144,10 +144,10 @@ async def test_end_rental_success(rental_service: RentalService, mock_car_repo: 
     """
     # Setup
     car_id = uuid4()
-    mock_car = Car(id=car_id, model="Kia", status=CarStatus.IN_USE)
+    mock_car = CarEntity(id=car_id, model="Kia", year=2021, status=CarStatus.IN_USE)
     mock_car_repo.get_by_id.return_value = mock_car
     
-    mock_active_rental = Rental(id=uuid4(), car_id=car_id, customer_name="Moshe Binieli")
+    mock_active_rental = RentalEntity(id=uuid4(), car_id=car_id, customer_name="Moshe Binieli")
     mock_rental_repo.get_active_rental_by_car_id.return_value = mock_active_rental
     
     # Act
@@ -185,7 +185,7 @@ async def test_end_rental_active_rental_not_found(rental_service: RentalService,
     """
     # Setup
     car_id = uuid4()
-    mock_car_repo.get_by_id.return_value = Car(id=car_id, model="Kia", status=CarStatus.IN_USE)
+    mock_car_repo.get_by_id.return_value = CarEntity(id=car_id, model="Kia", year=2021, status=CarStatus.IN_USE)
     mock_rental_repo.get_active_rental_by_car_id.return_value = None
     
     # Act / Assert
@@ -204,9 +204,9 @@ async def test_end_rental_already_ended(rental_service: RentalService, mock_car_
     
     # Setup
     car_id = uuid4()
-    mock_car_repo.get_by_id.return_value = Car(id=car_id, model="Kia", status=CarStatus.IN_USE)
+    mock_car_repo.get_by_id.return_value = CarEntity(id=car_id, model="Kia", year=2021, status=CarStatus.IN_USE)
     
-    ended_rental = Rental(id=uuid4(), car_id=car_id, customer_name="Moshe Binieli", end_date=datetime.now())
+    ended_rental = RentalEntity(id=uuid4(), car_id=car_id, customer_name="Moshe Binieli", end_date=datetime.now())
     mock_rental_repo.get_active_rental_by_car_id.return_value = ended_rental
     
     # Act / Assert

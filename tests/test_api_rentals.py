@@ -4,7 +4,7 @@ from uuid import uuid4
 from datetime import datetime, timezone
 from api.api import app
 from api.factories import get_db, rental_service_factory
-from db.rental_model import Rental
+from domain.entities.rental import RentalEntity
 from services.interfaces.rental_service_interface import IRentalService
 from services.interfaces.car_service_interface import ICarService
 
@@ -35,7 +35,7 @@ def test_api_create_rental_success() -> None:
     # Setup
     car_id = uuid4()
     rental_id = uuid4()
-    mock_rental = Rental(id=rental_id, car_id=car_id, customer_name="Moshe Binieli", start_date=datetime.now(timezone.utc), created_at=datetime.now(timezone.utc), updated_at=datetime.now(timezone.utc))
+    mock_rental = RentalEntity(id=rental_id, car_id=car_id, customer_name="Moshe Binieli", start_date=datetime.now(timezone.utc), created_at=datetime.now(timezone.utc), updated_at=datetime.now(timezone.utc))
     mock_rental_service.create_rental.return_value = mock_rental
     
     # Act
