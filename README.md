@@ -27,3 +27,9 @@ docker exec -it drivenow-db-1 psql -U user -d drivenow -c "SELECT * FROM rentals
 ## Tasks
 
 1. Review the SOLID principles and ensure the code meets the standards.
+
+## Testing
+
+```bash
+python -m pytest tests/ -v
+```

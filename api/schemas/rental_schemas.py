@@ -1,11 +1,11 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from uuid import UUID
 from datetime import datetime
 
 class RentalCreate(BaseModel):
     car_id: UUID
-    customer_name: str
+    customer_name: str = Field(..., min_length=2, description="Customer name cannot be empty")
 
 class RentalResponse(BaseModel):
     id: UUID
