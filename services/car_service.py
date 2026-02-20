@@ -30,13 +30,13 @@ class CarService(ICarService):
             raise InputValidationException(f"Car year must be {MIN_CAR_YEAR} or later")
             
         created_car = await self.repository.create(model=model, year=year, status=status)
-        self._update_car_metrics_on_create(status)
+        await self._update_car_metrics_on_create(status)
         self.logger.info(f"Car created successfully: {created_car.id}")
         return created_car
 
-    def _update_car_metrics_on_create(self, status: CarStatus) -> None:
+    async def _update_car_metrics_on_create(self, status: CarStatus) -> None:
         if status == CarStatus.AVAILABLE:
-            self.message_publisher.publish_event(constants.EVENT_CAR_CREATED_AVAILABLE, {})
+            await self.message_publisher.publish_event(constants.EVENT_CAR_CREATED_AVAILABLE, {})
 
     async def update_car(self, car_id: UUID, model: Optional[str] = None, year: Optional[int] = None, status: Optional[CarStatus] = None) -> Optional[CarEntity]:
         self.logger.info(f"Updating car: {car_id}")
@@ -56,7 +56,7 @@ class CarService(ICarService):
         old_status = car.status
         self._update_car_attributes(car, model, year, status)
         updated_car = await self.repository.update(car)
-        self._update_car_metrics_on_update(old_status, status)
+        await self._update_car_metrics_on_update(old_status, status)
 
         self.logger.info(f"Car updated successfully: {updated_car.id}")
         return updated_car
@@ -69,11 +69,11 @@ class CarService(ICarService):
         if status:
             car.status = status
 
-    def _update_car_metrics_on_update(self, old_status: CarStatus, new_status: Optional[CarStatus]) -> None:
+    async def _update_car_metrics_on_update(self, old_status: CarStatus, new_status: Optional[CarStatus]) -> None:
         if new_status is None or old_status == new_status:
             return
             
         if old_status == CarStatus.AVAILABLE and new_status != CarStatus.AVAILABLE:
-            self.message_publisher.publish_event(constants.EVENT_CAR_STATUS_CHANGED_FROM_AVAILABLE, {})
+            await self.message_publisher.publish_event(constants.EVENT_CAR_STATUS_CHANGED_FROM_AVAILABLE, {})
         elif old_status != CarStatus.AVAILABLE and new_status == CarStatus.AVAILABLE:
-            self.message_publisher.publish_event(constants.EVENT_CAR_STATUS_CHANGED_TO_AVAILABLE, {})
+            await self.message_publisher.publish_event(constants.EVENT_CAR_STATUS_CHANGED_TO_AVAILABLE, {})

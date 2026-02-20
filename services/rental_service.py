@@ -39,7 +39,7 @@ class RentalService(IRentalService):
         car.status = CarStatus.IN_USE
         await self.car_repository.update(car)
         
-        self.message_publisher.publish_event(constants.EVENT_RENTAL_CREATED, {"car_id": str(car_id), "rental_id": str(new_rental.id)})
+        await self.message_publisher.publish_event(constants.EVENT_RENTAL_CREATED, {"car_id": str(car_id), "rental_id": str(new_rental.id)})
         
         self.logger.info(f"Rental created successfully: {new_rental.id}")
         return new_rental
@@ -65,7 +65,7 @@ class RentalService(IRentalService):
         car.status = CarStatus.AVAILABLE
         await self.car_repository.update(car)
         
-        self.message_publisher.publish_event(constants.EVENT_RENTAL_ENDED, {"car_id": str(car_id), "rental_id": str(active_rental.id)})
+        await self.message_publisher.publish_event(constants.EVENT_RENTAL_ENDED, {"car_id": str(car_id), "rental_id": str(active_rental.id)})
         
         self.logger.info(f"Rental ended successfully: {active_rental.id} for car {car_id}")
         return active_rental

@@ -1,5 +1,5 @@
 sqlalchemy
-psycopg2-binary
+aio-pika
 python-dotenv
 fastapi
 uvicorn
@@ -8,4 +8,3 @@ pytest
 pytest-asyncio
 asyncpg
 httpx
-pika

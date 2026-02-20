@@ -3,5 +3,5 @@ from typing import Dict, Any
 
 class IMessagePublisher(ABC):
     @abstractmethod
-    def publish_event(self, event_type: str, payload: Dict[str, Any]) -> None:
+    async def publish_event(self, event_type: str, payload: Dict[str, Any]) -> None:
         pass

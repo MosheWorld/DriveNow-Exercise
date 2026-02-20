@@ -20,4 +20,5 @@ class Rental(Base):
     
     __table_args__ = (
         Index('ix_rentals_car_id_end_date', 'car_id', 'end_date'),
+        Index('ix_rentals_car_id_active', 'car_id'),
     )
