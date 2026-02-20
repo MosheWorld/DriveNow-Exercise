@@ -17,7 +17,7 @@ class Car(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid.uuid4)
     model = Column(String, nullable=False)
     year = Column(Integer, nullable=False)
-    status = Column(Enum(CarStatus), default=CarStatus.AVAILABLE, nullable=False)
+    status = Column(Enum(CarStatus), default=CarStatus.AVAILABLE, nullable=False, index=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
