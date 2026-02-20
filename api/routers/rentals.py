@@ -10,7 +10,7 @@ router = APIRouter(prefix="/rentals", tags=["rentals"])
 logger = Logger()
 
 @router.post("", response_model=RentalResponse, status_code=status.HTTP_201_CREATED)
-def create_rental(rental: RentalCreate, service: IRentalService = Depends(rental_service_factory)):
+async def create_rental(rental: RentalCreate, service: IRentalService = Depends(rental_service_factory)):
     """
     Initiate a new car rental session for a customer.
 
@@ -18,7 +18,7 @@ def create_rental(rental: RentalCreate, service: IRentalService = Depends(rental
     to 'in_use' and triggers an asynchronous event for metrics tracking.
     """
     try:
-        return service.create_rental(car_id=rental.car_id, customer_name=rental.customer_name)
+        return await service.create_rental(car_id=rental.car_id, customer_name=rental.customer_name)
     except InputValidationException as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except NotFoundException as e:
@@ -33,7 +33,7 @@ def create_rental(rental: RentalCreate, service: IRentalService = Depends(rental
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="An unexpected error occurred")
 
 @router.patch("/{car_id}/end-rental", response_model=RentalResponse)
-def end_rental_by_car_id(car_id: UUID, service: IRentalService = Depends(rental_service_factory)):
+async def end_rental_by_car_id(car_id: UUID, service: IRentalService = Depends(rental_service_factory)):
     """
     Terminate an active rental session.
 
@@ -41,7 +41,7 @@ def end_rental_by_car_id(car_id: UUID, service: IRentalService = Depends(rental_
     status back to 'available' for future customers.
     """
     try:
-        return service.end_rental_by_car_id(car_id)
+        return await service.end_rental_by_car_id(car_id)
     except InputValidationException as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except NotFoundException as e:

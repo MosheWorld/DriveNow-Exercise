@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-from unittest.mock import Mock
+from unittest.mock import AsyncMock
 from uuid import uuid4
 from datetime import datetime, timezone
 from api.api import app
@@ -8,14 +8,14 @@ from db.rental_model import Rental
 from services.interfaces.rental_service_interface import IRentalService
 from services.interfaces.car_service_interface import ICarService
 
-mock_car_service: Mock = Mock(spec=ICarService)
-mock_rental_service: Mock = Mock(spec=IRentalService)
+mock_car_service: AsyncMock = AsyncMock(spec=ICarService)
+mock_rental_service: AsyncMock = AsyncMock(spec=IRentalService)
 
 def override_get_db() -> None:
     """Mock the DB dependency so no connection is attempted."""
     pass
 
-def override_rental_service_factory() -> Mock:
+def override_rental_service_factory() -> AsyncMock:
     """Mock the factory to return our controlled mocked service."""
     return mock_rental_service
 

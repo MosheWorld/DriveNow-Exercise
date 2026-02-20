@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 from uuid import uuid4
 from db.car_model import Car, CarStatus
 from db.rental_model import Rental
@@ -22,17 +22,17 @@ def mock_message_publisher() -> Mock:
     return Mock(spec=IMessagePublisher)
 
 @pytest.fixture
-def mock_car_repo() -> Mock:
+def mock_car_repo() -> AsyncMock:
     """Fixture for mocking the Car Repository interface."""
-    return Mock(spec=ICarRepository)
+    return AsyncMock(spec=ICarRepository)
 
 @pytest.fixture
-def mock_rental_repo() -> Mock:
+def mock_rental_repo() -> AsyncMock:
     """Fixture for mocking the Rental Repository interface."""
-    return Mock(spec=IRentalRepository)
+    return AsyncMock(spec=IRentalRepository)
 
 @pytest.fixture
-def rental_service(mock_logger: Mock, mock_message_publisher: Mock, mock_rental_repo: Mock, mock_car_repo: Mock) -> RentalService:
+def rental_service(mock_logger: Mock, mock_message_publisher: Mock, mock_rental_repo: AsyncMock, mock_car_repo: AsyncMock) -> RentalService:
     """Fixture that provides a RentalService instance injected with mocked dependencies."""
     return RentalService(
         logger=mock_logger,
@@ -41,7 +41,8 @@ def rental_service(mock_logger: Mock, mock_message_publisher: Mock, mock_rental_
         car_repository=mock_car_repo
     )
 
-def test_create_rental_success(rental_service: RentalService, mock_car_repo: Mock, mock_rental_repo: Mock, mock_message_publisher: Mock) -> None:
+@pytest.mark.asyncio
+async def test_create_rental_success(rental_service: RentalService, mock_car_repo: AsyncMock, mock_rental_repo: AsyncMock, mock_message_publisher: Mock) -> None:
     """
     Successfully create a new rental.
     
@@ -57,7 +58,7 @@ def test_create_rental_success(rental_service: RentalService, mock_car_repo: Moc
     mock_rental_repo.create.return_value = expected_rental
 
     # Act
-    rental = rental_service.create_rental(car_id=car_id, customer_name="Moshe Binieli")
+    rental = await rental_service.create_rental(car_id=car_id, customer_name="Moshe Binieli")
 
     # Assert
     assert rental == expected_rental
@@ -69,7 +70,8 @@ def test_create_rental_success(rental_service: RentalService, mock_car_repo: Moc
         constants.EVENT_RENTAL_CREATED, {"car_id": str(car_id), "rental_id": str(expected_rental.id)}
     )
 
-def test_create_rental_empty_customer_name(rental_service: RentalService) -> None:
+@pytest.mark.asyncio
+async def test_create_rental_empty_customer_name(rental_service: RentalService) -> None:
     """
     Fail to create a rental with an empty customer name.
     
@@ -78,10 +80,11 @@ def test_create_rental_empty_customer_name(rental_service: RentalService) -> Non
     """
     # Setup / Act / Assert
     with pytest.raises(InputValidationException) as exc_info:
-        rental_service.create_rental(car_id=uuid4(), customer_name="   ")
+        await rental_service.create_rental(car_id=uuid4(), customer_name="   ")
     assert "Customer name cannot be empty" in str(exc_info.value)
 
-def test_create_rental_car_not_found(rental_service: RentalService, mock_car_repo: Mock) -> None:
+@pytest.mark.asyncio
+async def test_create_rental_car_not_found(rental_service: RentalService, mock_car_repo: AsyncMock) -> None:
     """
     Fail to create a rental when the target car does not exist.
     
@@ -93,10 +96,11 @@ def test_create_rental_car_not_found(rental_service: RentalService, mock_car_rep
 
     # Act / Assert
     with pytest.raises(NotFoundException) as exc_info:
-        rental_service.create_rental(car_id=car_id, customer_name="Moshe Binieli")
+        await rental_service.create_rental(car_id=car_id, customer_name="Moshe Binieli")
     assert f"Car {car_id} not found" in str(exc_info.value)
 
-def test_create_rental_car_not_available(rental_service: RentalService, mock_car_repo: Mock) -> None:
+@pytest.mark.asyncio
+async def test_create_rental_car_not_available(rental_service: RentalService, mock_car_repo: AsyncMock) -> None:
     """
     Fail to create a rental when the target car is already in use.
     
@@ -109,10 +113,11 @@ def test_create_rental_car_not_available(rental_service: RentalService, mock_car
 
     # Act / Assert
     with pytest.raises(CarStatusUnavailableException) as exc_info:
-        rental_service.create_rental(car_id=car_id, customer_name="Moshe Binieli")
+        await rental_service.create_rental(car_id=car_id, customer_name="Moshe Binieli")
     assert "Car is not available for rent" in str(exc_info.value)
 
-def test_get_all_rentals(rental_service: RentalService, mock_rental_repo: Mock) -> None:
+@pytest.mark.asyncio
+async def test_get_all_rentals(rental_service: RentalService, mock_rental_repo: AsyncMock) -> None:
     """
     Successfully retrieve a list of all rentals.
     
@@ -123,13 +128,14 @@ def test_get_all_rentals(rental_service: RentalService, mock_rental_repo: Mock) 
     mock_rental_repo.get_all.return_value = mock_rentals
     
     # Act
-    rentals = rental_service.get_all_rentals()
+    rentals = await rental_service.get_all_rentals()
     
     # Assert
     assert rentals == mock_rentals
     mock_rental_repo.get_all.assert_called_once()
 
-def test_end_rental_success(rental_service: RentalService, mock_car_repo: Mock, mock_rental_repo: Mock, mock_message_publisher: Mock) -> None:
+@pytest.mark.asyncio
+async def test_end_rental_success(rental_service: RentalService, mock_car_repo: AsyncMock, mock_rental_repo: AsyncMock, mock_message_publisher: Mock) -> None:
     """
     Successfully ends an ongoing rental.
     
@@ -145,7 +151,7 @@ def test_end_rental_success(rental_service: RentalService, mock_car_repo: Mock, 
     mock_rental_repo.get_active_rental_by_car_id.return_value = mock_active_rental
     
     # Act
-    ended_rental = rental_service.end_rental_by_car_id(car_id)
+    ended_rental = await rental_service.end_rental_by_car_id(car_id)
     
     # Assert
     assert ended_rental == mock_active_rental
@@ -158,7 +164,8 @@ def test_end_rental_success(rental_service: RentalService, mock_car_repo: Mock, 
         constants.EVENT_RENTAL_ENDED, {"car_id": str(car_id), "rental_id": str(mock_active_rental.id)}
     )
 
-def test_end_rental_car_not_found(rental_service: RentalService, mock_car_repo: Mock) -> None:
+@pytest.mark.asyncio
+async def test_end_rental_car_not_found(rental_service: RentalService, mock_car_repo: AsyncMock) -> None:
     """
     Fail to end a rental if the target car doesn't exist.
     """
@@ -168,10 +175,11 @@ def test_end_rental_car_not_found(rental_service: RentalService, mock_car_repo: 
     
     # Act / Assert
     with pytest.raises(NotFoundException) as exc_info:
-        rental_service.end_rental_by_car_id(car_id)
+        await rental_service.end_rental_by_car_id(car_id)
     assert f"Car {car_id} not found" in str(exc_info.value)
 
-def test_end_rental_active_rental_not_found(rental_service: RentalService, mock_car_repo: Mock, mock_rental_repo: Mock) -> None:
+@pytest.mark.asyncio
+async def test_end_rental_active_rental_not_found(rental_service: RentalService, mock_car_repo: AsyncMock, mock_rental_repo: AsyncMock) -> None:
     """
     Fail to end a rental if the car exists but has no ongoing rental associated.
     """
@@ -182,10 +190,11 @@ def test_end_rental_active_rental_not_found(rental_service: RentalService, mock_
     
     # Act / Assert
     with pytest.raises(NotFoundException) as exc_info:
-        rental_service.end_rental_by_car_id(car_id)
+        await rental_service.end_rental_by_car_id(car_id)
     assert f"No active rental found for car {car_id}" in str(exc_info.value)
 
-def test_end_rental_already_ended(rental_service: RentalService, mock_car_repo: Mock, mock_rental_repo: Mock) -> None:
+@pytest.mark.asyncio
+async def test_end_rental_already_ended(rental_service: RentalService, mock_car_repo: AsyncMock, mock_rental_repo: AsyncMock) -> None:
     """
     Fail to end a rental if the active rental retrieved strangely has an end_date.
     
@@ -202,5 +211,5 @@ def test_end_rental_already_ended(rental_service: RentalService, mock_car_repo: 
     
     # Act / Assert
     with pytest.raises(RentalAlreadyEndedException) as exc_info:
-        rental_service.end_rental_by_car_id(car_id)
+        await rental_service.end_rental_by_car_id(car_id)
     assert "Rental already ended" in str(exc_info.value)

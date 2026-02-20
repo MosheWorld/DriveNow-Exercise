@@ -5,5 +5,7 @@ fastapi
 uvicorn
 prometheus-client
 pytest
+pytest-asyncio
+asyncpg
 httpx
 pika

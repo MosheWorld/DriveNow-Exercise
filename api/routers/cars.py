@@ -12,7 +12,7 @@ router = APIRouter(prefix="/cars", tags=["cars"])
 logger = Logger()
 
 @router.post("", response_model=CarResponse, status_code=status.HTTP_201_CREATED)
-def create_car(car: CarCreate, service: ICarService = Depends(car_service_factory)):
+async def create_car(car: CarCreate, service: ICarService = Depends(car_service_factory)):
     """
     Register a new car in the fleet registry.
 
@@ -20,7 +20,7 @@ def create_car(car: CarCreate, service: ICarService = Depends(car_service_factor
     and the production year is after 1950.
     """
     try:
-        return service.create_car(model=car.model, year=car.year, status=car.status)
+        return await service.create_car(model=car.model, year=car.year, status=car.status)
     except InputValidationException as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except DatabaseException as e:
@@ -31,7 +31,7 @@ def create_car(car: CarCreate, service: ICarService = Depends(car_service_factor
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="An unexpected error occurred")
 
 @router.put("/{car_id}", response_model=CarResponse)
-def update_car(car_id: UUID, car_update: CarUpdate, service: ICarService = Depends(car_service_factory)):
+async def update_car(car_id: UUID, car_update: CarUpdate, service: ICarService = Depends(car_service_factory)):
     """
     Update details of an existing vehicle.
 
@@ -39,7 +39,7 @@ def update_car(car_id: UUID, car_update: CarUpdate, service: ICarService = Depen
     Verifies that the car exists before applying changes.
     """
     try:
-        return service.update_car(car_id=car_id, model=car_update.model, year=car_update.year, status=car_update.status)
+        return await service.update_car(car_id=car_id, model=car_update.model, year=car_update.year, status=car_update.status)
     except InputValidationException as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except NotFoundException as e:
@@ -52,7 +52,7 @@ def update_car(car_id: UUID, car_update: CarUpdate, service: ICarService = Depen
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="An unexpected error occurred")
 
 @router.get("", response_model=List[CarResponse])
-def get_cars(status: Optional[CarStatus] = None, service: ICarService = Depends(car_service_factory)):
+async def get_cars(status: Optional[CarStatus] = None, service: ICarService = Depends(car_service_factory)):
     """
     List all vehicles with optional status filtering.
 
@@ -60,7 +60,7 @@ def get_cars(status: Optional[CarStatus] = None, service: ICarService = Depends(
     current status (available, in_use, or under_maintenance).
     """
     try:
-        return service.get_all_cars(status)
+        return await service.get_all_cars(status)
     except DatabaseException as e:
         logger.error(f"Database error retrieving cars: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")

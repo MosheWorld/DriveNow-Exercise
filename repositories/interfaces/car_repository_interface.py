@@ -5,17 +5,17 @@ from db.car_model import Car, CarStatus
 
 class ICarRepository(ABC):
     @abstractmethod
-    def get_all(self, status: Optional[CarStatus] = None) -> List[Car]:
+    async def get_all(self, status: Optional[CarStatus] = None) -> List[Car]:
         pass
 
     @abstractmethod
-    def get_by_id(self, car_id: UUID) -> Optional[Car]:
+    async def get_by_id(self, car_id: UUID) -> Optional[Car]:
         pass
 
     @abstractmethod
-    def create(self, model: str, year: int, status: CarStatus = CarStatus.AVAILABLE) -> Car:
+    async def create(self, model: str, year: int, status: CarStatus = CarStatus.AVAILABLE) -> Car:
         pass
 
     @abstractmethod
-    def update(self, car: Car) -> Car:
+    async def update(self, car: Car) -> Car:
         pass
