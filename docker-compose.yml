@@ -2,11 +2,8 @@ services:
   db:
     image: postgres:18-alpine
     container_name: drivenow_db
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: drivenow
-      PGDATA: /var/lib/postgresql/data/pgdata
+    env_file:
+      - .env.docker
     ports:
       - "5432:5432"
     volumes:
@@ -22,14 +19,8 @@ services:
     container_name: drivenow_api
     ports:
       - "8000:8000"
-    environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=drivenow
-      - POSTGRES_HOST=db
-      - POSTGRES_PORT=5432
-      - RABBITMQ_HOST=rabbitmq
-      - WORKER_METRICS_URL=http://metrics_worker:8001
+    env_file:
+      - .env.docker
     depends_on:
       db:
         condition: service_healthy
@@ -49,9 +40,8 @@ services:
     build: .
     container_name: drivenow_metrics_worker
     command: python -m worker.metrics_worker
-    environment:
-      - PYTHONUNBUFFERED=1
-      - RABBITMQ_HOST=rabbitmq
+    env_file:
+      - .env.docker
     depends_on:
       rabbitmq:
         condition: service_healthy
