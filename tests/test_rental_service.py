@@ -7,7 +7,8 @@ from common.exceptions import NotFoundException, CarStatusUnavailableException, 
 from services.rental_service import RentalService
 from repositories.interfaces.car_repository_interface import ICarRepository
 from repositories.interfaces.rental_repository_interface import IRentalRepository
-from services.interfaces.metrics_service_interface import IMetricsService
+from common.interfaces.message_publisher_interface import IMessagePublisher
+import common.constants as constants
 from common.interfaces.logger_interface import ILogger
 
 @pytest.fixture
@@ -16,9 +17,9 @@ def mock_logger() -> Mock:
     return Mock(spec=ILogger)
 
 @pytest.fixture
-def mock_metrics() -> Mock:
-    """Fixture for mocking the Metrics Service interface."""
-    return Mock(spec=IMetricsService)
+def mock_message_publisher() -> Mock:
+    """Fixture for mocking the Message Publisher interface."""
+    return Mock(spec=IMessagePublisher)
 
 @pytest.fixture
 def mock_car_repo() -> Mock:
@@ -31,16 +32,16 @@ def mock_rental_repo() -> Mock:
     return Mock(spec=IRentalRepository)
 
 @pytest.fixture
-def rental_service(mock_logger: Mock, mock_metrics: Mock, mock_rental_repo: Mock, mock_car_repo: Mock) -> RentalService:
+def rental_service(mock_logger: Mock, mock_message_publisher: Mock, mock_rental_repo: Mock, mock_car_repo: Mock) -> RentalService:
     """Fixture that provides a RentalService instance injected with mocked dependencies."""
     return RentalService(
         logger=mock_logger,
-        metrics=mock_metrics,
+        message_publisher=mock_message_publisher,
         rental_repository=mock_rental_repo,
         car_repository=mock_car_repo
     )
 
-def test_create_rental_success(rental_service: RentalService, mock_car_repo: Mock, mock_rental_repo: Mock, mock_metrics: Mock) -> None:
+def test_create_rental_success(rental_service: RentalService, mock_car_repo: Mock, mock_rental_repo: Mock, mock_message_publisher: Mock) -> None:
     """
     Successfully create a new rental.
     
@@ -64,8 +65,9 @@ def test_create_rental_success(rental_service: RentalService, mock_car_repo: Moc
     mock_car_repo.get_by_id.assert_called_once_with(car_id)
     mock_car_repo.update.assert_called_once_with(mock_car)
     mock_rental_repo.create.assert_called_once_with(car_id=car_id, customer_name="Moshe Binieli")
-    mock_metrics.decrement_active_cars.assert_called_once()
-    mock_metrics.increment_ongoing_rentals.assert_called_once()
+    mock_message_publisher.publish_event.assert_called_once_with(
+        constants.EVENT_RENTAL_CREATED, {"car_id": str(car_id), "rental_id": str(expected_rental.id)}
+    )
 
 def test_create_rental_empty_customer_name(rental_service: RentalService) -> None:
     """
@@ -127,7 +129,7 @@ def test_get_all_rentals(rental_service: RentalService, mock_rental_repo: Mock) 
     assert rentals == mock_rentals
     mock_rental_repo.get_all.assert_called_once()
 
-def test_end_rental_success(rental_service: RentalService, mock_car_repo: Mock, mock_rental_repo: Mock, mock_metrics: Mock) -> None:
+def test_end_rental_success(rental_service: RentalService, mock_car_repo: Mock, mock_rental_repo: Mock, mock_message_publisher: Mock) -> None:
     """
     Successfully ends an ongoing rental.
     
@@ -152,8 +154,9 @@ def test_end_rental_success(rental_service: RentalService, mock_car_repo: Mock, 
     mock_rental_repo.get_active_rental_by_car_id.assert_called_once_with(car_id)
     mock_rental_repo.end_rental.assert_called_once_with(mock_active_rental)
     mock_car_repo.update.assert_called_once_with(mock_car)
-    mock_metrics.increment_active_cars.assert_called_once()
-    mock_metrics.decrement_ongoing_rentals.assert_called_once()
+    mock_message_publisher.publish_event.assert_called_once_with(
+        constants.EVENT_RENTAL_ENDED, {"car_id": str(car_id), "rental_id": str(mock_active_rental.id)}
+    )
 
 def test_end_rental_car_not_found(rental_service: RentalService, mock_car_repo: Mock) -> None:
     """

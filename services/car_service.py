@@ -6,14 +6,15 @@ from services.interfaces.car_service_interface import ICarService
 from repositories.interfaces.car_repository_interface import ICarRepository
 from common.exceptions import NotFoundException, InputValidationException
 from common.interfaces.logger_interface import ILogger
-from services.interfaces.metrics_service_interface import IMetricsService
+from common.interfaces.message_publisher_interface import IMessagePublisher
+import common.constants as constants
 
 MIN_CAR_YEAR = 1950
 
 class CarService(ICarService):
-    def __init__(self, logger: ILogger, metrics: IMetricsService, repository: ICarRepository) -> None:
+    def __init__(self, logger: ILogger, message_publisher: IMessagePublisher, repository: ICarRepository) -> None:
         self.logger = logger
-        self.metrics = metrics
+        self.message_publisher = message_publisher
         self.repository = repository
 
     def get_all_cars(self, status: Optional[CarStatus] = None) -> List[Car]:
@@ -39,7 +40,7 @@ class CarService(ICarService):
 
     def _update_car_metrics_on_create(self, status: CarStatus) -> None:
         if status == CarStatus.AVAILABLE:
-            self.metrics.increment_active_cars()
+            self.message_publisher.publish_event(constants.EVENT_CAR_CREATED_AVAILABLE, {})
 
     def update_car(self, car_id: UUID, model: Optional[str] = None, year: Optional[int] = None, status: Optional[CarStatus] = None) -> Optional[Car]:
         self.logger.info(f"Updating car: {car_id}")
@@ -77,9 +78,6 @@ class CarService(ICarService):
             return
             
         if old_status == CarStatus.AVAILABLE and new_status != CarStatus.AVAILABLE:
-            self.metrics.decrement_active_cars()
+            self.message_publisher.publish_event(constants.EVENT_CAR_STATUS_CHANGED_FROM_AVAILABLE, {})
         elif old_status != CarStatus.AVAILABLE and new_status == CarStatus.AVAILABLE:
-            self.metrics.increment_active_cars()
-
-        self.logger.info(f"Car updated successfully: {updated_car.id}")
-        return updated_car
+            self.message_publisher.publish_event(constants.EVENT_CAR_STATUS_CHANGED_TO_AVAILABLE, {})

@@ -8,12 +8,13 @@ from repositories.interfaces.rental_repository_interface import IRentalRepositor
 from repositories.interfaces.car_repository_interface import ICarRepository
 from common.exceptions import NotFoundException, CarStatusUnavailableException, RentalAlreadyEndedException, InputValidationException
 from common.interfaces.logger_interface import ILogger
-from services.interfaces.metrics_service_interface import IMetricsService
+from common.interfaces.message_publisher_interface import IMessagePublisher
+import common.constants as constants
 
 class RentalService(IRentalService):
-    def __init__(self, logger: ILogger, metrics: IMetricsService, rental_repository: IRentalRepository, car_repository: ICarRepository) -> None:
+    def __init__(self, logger: ILogger, message_publisher: IMessagePublisher, rental_repository: IRentalRepository, car_repository: ICarRepository) -> None:
         self.logger = logger
-        self.metrics = metrics
+        self.message_publisher = message_publisher
         self.rental_repository = rental_repository
         self.car_repository = car_repository
 
@@ -40,8 +41,7 @@ class RentalService(IRentalService):
         car.status = CarStatus.IN_USE
         self.car_repository.update(car)
         
-        self.metrics.decrement_active_cars()
-        self.metrics.increment_ongoing_rentals()
+        self.message_publisher.publish_event(constants.EVENT_RENTAL_CREATED, {"car_id": str(car_id), "rental_id": str(new_rental.id)})
         
         self.logger.info(f"Rental created successfully: {new_rental.id}")
         return new_rental
@@ -67,8 +67,7 @@ class RentalService(IRentalService):
         car.status = CarStatus.AVAILABLE
         self.car_repository.update(car)
         
-        self.metrics.increment_active_cars()
-        self.metrics.decrement_ongoing_rentals()
+        self.message_publisher.publish_event(constants.EVENT_RENTAL_ENDED, {"car_id": str(car_id), "rental_id": str(active_rental.id)})
         
         self.logger.info(f"Rental ended successfully: {active_rental.id} for car {car_id}")
         return active_rental

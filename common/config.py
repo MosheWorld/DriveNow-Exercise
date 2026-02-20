@@ -12,6 +12,8 @@ class ConfigManager:
         self.POSTGRES_PORT = os.getenv("POSTGRES_PORT")
         self.LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
         self.LOG_FILE = os.getenv("LOG_FILE", "drivenow.log")
+        self.RABBITMQ_HOST = os.getenv("RABBITMQ_HOST")
+        self.WORKER_METRICS_URL = os.getenv("WORKER_METRICS_URL")
 
     def get_database_url(self) -> str:
         return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"

@@ -6,3 +6,4 @@ uvicorn
 prometheus-client
 pytest
 httpx
+pika
