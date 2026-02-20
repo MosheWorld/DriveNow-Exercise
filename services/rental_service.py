@@ -8,10 +8,12 @@ from repositories.interfaces.rental_repository_interface import IRentalRepositor
 from repositories.interfaces.car_repository_interface import ICarRepository
 from common.exceptions import NotFoundException, CarStatusUnavailableException, RentalAlreadyEndedException, InputValidationException
 from common.interfaces.logger_interface import ILogger
+from services.interfaces.metrics_service_interface import IMetricsService
 
 class RentalService(IRentalService):
-    def __init__(self, logger: ILogger, rental_repository: IRentalRepository, car_repository: ICarRepository) -> None:
+    def __init__(self, logger: ILogger, metrics: IMetricsService, rental_repository: IRentalRepository, car_repository: ICarRepository) -> None:
         self.logger = logger
+        self.metrics = metrics
         self.rental_repository = rental_repository
         self.car_repository = car_repository
 
@@ -38,6 +40,9 @@ class RentalService(IRentalService):
         car.status = CarStatus.IN_USE
         self.car_repository.update(car)
         
+        self.metrics.decrement_active_cars()
+        self.metrics.increment_ongoing_rentals()
+        
         self.logger.info(f"Rental created successfully: {new_rental.id}")
         return new_rental
 
@@ -61,6 +66,9 @@ class RentalService(IRentalService):
         
         car.status = CarStatus.AVAILABLE
         self.car_repository.update(car)
+        
+        self.metrics.increment_active_cars()
+        self.metrics.decrement_ongoing_rentals()
         
         self.logger.info(f"Rental ended successfully: {active_rental.id} for car {car_id}")
         return active_rental
