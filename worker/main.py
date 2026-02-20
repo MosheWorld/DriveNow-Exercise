@@ -1,15 +1,20 @@
 import json
 import pika
+from pika.adapters.blocking_connection import BlockingChannel
+from pika.spec import Basic, BasicProperties
 import time
 from prometheus_client import start_http_server, Gauge
 from common.config import settings
 from common.message_schema import MessageEvent
 import common.constants as constants
+from common.logger import Logger
+
+logger = Logger()
 
 AVAILABLE_CARS_GAUGE = Gauge('drivenow_available_cars_total', 'Total number of cars currently available for rent in the fleet')
 ACTIVE_RENTALS_GAUGE = Gauge('drivenow_active_rentals_total', 'Total number of active rentals that have not yet been ended')
 
-def callback(ch, method, properties, body) -> None:
+def callback(ch: BlockingChannel, method: Basic.Deliver, properties: BasicProperties, body: bytes) -> None:
     try:
         data = json.loads(body)
         event = MessageEvent(**data)
@@ -27,7 +32,7 @@ def callback(ch, method, properties, body) -> None:
             AVAILABLE_CARS_GAUGE.inc()
             
     except Exception as e:
-        print(f"Error processing message: {e}", flush=True)
+        logger.error(f"Error processing message: {e}")
 
 def start_worker() -> None:
     start_http_server(8001)
@@ -37,13 +42,12 @@ def start_worker() -> None:
         try:
             connection = pika.BlockingConnection(pika.ConnectionParameters(host=settings.RABBITMQ_HOST))
         except Exception:
-            print("RabbitMQ not ready yet, retrying in 2 seconds...", flush=True)
+            logger.warning("RabbitMQ not ready yet, retrying in 2 seconds...")
             time.sleep(2)
             
     channel = connection.channel()
     channel.queue_declare(queue=constants.METRICS_QUEUE_NAME, durable=True)
-    
-    print('Waiting for messages. To exit press CTRL+C', flush=True)
+
     channel.basic_consume(queue=constants.METRICS_QUEUE_NAME, on_message_callback=callback, auto_ack=True)
     channel.start_consuming()
 

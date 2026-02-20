@@ -30,7 +30,7 @@ class Logger(ILogger):
             file_handler.setFormatter(formatter)
             self.logger.addHandler(file_handler)
         except Exception as e:
-            print(f"Failed to setup file logging: {e}")
+            self.logger.error(f"Failed to setup file logging: {e}")
 
     def info(self, message: str) -> None:
         self.logger.info(message)
