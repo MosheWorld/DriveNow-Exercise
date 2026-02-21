@@ -8,7 +8,7 @@ from common.config import settings
 class RabbitMQPublisher(IMessagePublisher):
     def __init__(self, logger: ILogger) -> None:
         self.logger = logger
-        self.host = settings.RABBITMQ_HOST
+        self.host: str = settings.RABBITMQ_HOST
         self.connection = None
         self.channel = None
 
