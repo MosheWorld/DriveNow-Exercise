@@ -1,5 +1,6 @@
 import json
 import aio_pika
+from aio_pika.abc import AbstractIncomingMessage
 import asyncio
 from prometheus_client import start_http_server, Gauge
 from common.config import settings
@@ -12,7 +13,7 @@ logger = Logger()
 AVAILABLE_CARS_GAUGE = Gauge('drivenow_available_cars_total', 'Total number of cars currently available for rent in the fleet')
 ACTIVE_RENTALS_GAUGE = Gauge('drivenow_active_rentals_total', 'Total number of active rentals that have not yet been ended')
 
-async def process_message(message: aio_pika.IncomingMessage) -> None:
+async def process_message(message: AbstractIncomingMessage) -> None:
     async with message.process():
         try:
             data = json.loads(message.body)
