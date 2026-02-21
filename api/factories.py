@@ -7,6 +7,8 @@ from services.car_service import CarService
 from services.rental_service import RentalService
 from services.interfaces.car_service_interface import ICarService
 from services.interfaces.rental_service_interface import IRentalService
+from services.interfaces.metrics_service_interface import IMetricsService
+from services.metrics_service import MetricsService
 from common.messaging.rabbitmq_publisher import RabbitMQPublisher
 from common.logger import Logger
 
@@ -22,3 +24,6 @@ def rental_service_factory(db: AsyncSession = Depends(get_db)) -> IRentalService
     rental_repo = RentalRepository(db)
     car_repo = CarRepository(db)
     return RentalService(logger, event_publisher, rental_repo, car_repo)
+
+def metrics_service_factory() -> IMetricsService:
+    return MetricsService()

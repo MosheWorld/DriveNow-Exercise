@@ -1,6 +1,7 @@
 import httpx
-from fastapi import APIRouter, Response
-from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+from fastapi import APIRouter, Response, Depends
+from services.interfaces.metrics_service_interface import IMetricsService
+from api.factories import metrics_service_factory
 from common.logger import Logger
 from common.config import settings
 
@@ -8,14 +9,15 @@ router = APIRouter(prefix="/metrics", tags=["metrics"])
 logger = Logger()
 
 @router.get("")
-async def get_metrics() -> Response:
+async def get_metrics(metrics_service: IMetricsService = Depends(metrics_service_factory)) -> Response:
     """
     Retrieve aggregated, real-time system metrics.
 
     Merges internal API HTTP metrics with real-time business metrics fetched 
     from the background RabbitMQ worker service.
     """
-    api_metrics = generate_latest().decode("utf-8")
+    api_metrics_raw, content_type = metrics_service.get_metrics_data()
+    api_metrics = api_metrics_raw.decode("utf-8")
     
     worker_metrics = ""
     try:
@@ -28,4 +30,4 @@ async def get_metrics() -> Response:
         logger.error(f"Failed to fetch worker metrics: {e}")
         
     combined = api_metrics + "\n" + worker_metrics
-    return Response(content=combined, media_type=CONTENT_TYPE_LATEST)
+    return Response(content=combined, media_type=content_type)

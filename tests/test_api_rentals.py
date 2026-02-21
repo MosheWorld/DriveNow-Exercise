@@ -6,9 +6,7 @@ from api.api import app
 from api.factories import get_db, rental_service_factory
 from domain.entities.rental import RentalEntity
 from services.interfaces.rental_service_interface import IRentalService
-from services.interfaces.car_service_interface import ICarService
 
-mock_car_service: AsyncMock = AsyncMock(spec=ICarService)
 mock_rental_service: AsyncMock = AsyncMock(spec=IRentalService)
 
 def override_get_db() -> None:
