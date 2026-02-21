@@ -19,7 +19,7 @@ class CarService(ICarService):
     async def get_all_cars(self, status: Optional[CarStatus] = None) -> List[CarEntity]:
         return await self.repository.get_all(status)
 
-    async def create_car(self, model: str, year: int, status: CarStatus = CarStatus.AVAILABLE) -> CarEntity:
+    async def create_car(self, model: str, year: int) -> CarEntity:
         self.logger.info(f"Creating car: {model} ({year})")
         if not model or not model.strip():
             self.logger.error("Attempted to create car with empty model")
@@ -29,14 +29,12 @@ class CarService(ICarService):
             self.logger.error(f"Attempted to create car with year {year} < {MIN_CAR_YEAR}")
             raise InputValidationException(f"Car year must be {MIN_CAR_YEAR} or later")
             
-        created_car = await self.repository.create(model=model, year=year, status=status)
-        await self._update_car_metrics_on_create(status)
+        created_car = await self.repository.create(model=model, year=year)
+        await self.message_publisher.publish_event(constants.EVENT_CAR_CREATED_AVAILABLE, {})
         self.logger.info(f"Car created successfully: {created_car.id}")
         return created_car
 
-    async def _update_car_metrics_on_create(self, status: CarStatus) -> None:
-        if status == CarStatus.AVAILABLE:
-            await self.message_publisher.publish_event(constants.EVENT_CAR_CREATED_AVAILABLE, {})
+
 
     async def update_car(self, car_id: UUID, model: Optional[str] = None, year: Optional[int] = None, status: Optional[CarStatus] = None) -> Optional[CarEntity]:
         self.logger.info(f"Updating car: {car_id}")

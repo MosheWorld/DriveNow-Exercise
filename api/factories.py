@@ -1,5 +1,5 @@
 from fastapi import Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from db.database import get_db
 from repositories.car_repository import CarRepository
 from repositories.rental_repository import RentalRepository
@@ -10,13 +10,13 @@ from services.interfaces.rental_service_interface import IRentalService
 from common.messaging.rabbitmq_publisher import RabbitMQPublisher
 from common.logger import Logger
 
-def car_service_factory(db: Session = Depends(get_db)) -> ICarService:
+def car_service_factory(db: AsyncSession = Depends(get_db)) -> ICarService:
     logger = Logger()
     event_publisher = RabbitMQPublisher(logger)
     repository = CarRepository(db)
     return CarService(logger, event_publisher, repository)
 
-def rental_service_factory(db: Session = Depends(get_db)) -> IRentalService:
+def rental_service_factory(db: AsyncSession = Depends(get_db)) -> IRentalService:
     logger = Logger()
     event_publisher = RabbitMQPublisher(logger)
     rental_repo = RentalRepository(db)

@@ -13,7 +13,7 @@ class ICarRepository(ABC):
         pass
 
     @abstractmethod
-    async def create(self, model: str, year: int, status: CarStatus = CarStatus.AVAILABLE) -> CarEntity:
+    async def create(self, model: str, year: int) -> CarEntity:
         pass
 
     @abstractmethod

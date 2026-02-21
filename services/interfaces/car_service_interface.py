@@ -9,7 +9,7 @@ class ICarService(ABC):
         pass
 
     @abstractmethod
-    async def create_car(self, model: str, year: int, status: CarStatus = CarStatus.AVAILABLE) -> CarEntity:
+    async def create_car(self, model: str, year: int) -> CarEntity:
         pass
 
     @abstractmethod

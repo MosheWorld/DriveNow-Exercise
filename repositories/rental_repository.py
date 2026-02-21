@@ -10,9 +10,7 @@ from domain.entities.rental import RentalEntity
 from repositories.interfaces.rental_repository_interface import IRentalRepository
 from common.exceptions import DatabaseException
 
-def _to_entity(model: RentalModel) -> Optional[RentalEntity]:
-    if not model:
-        return None
+def _to_entity(model: RentalModel) -> RentalEntity:
     return RentalEntity(
         id=model.id,
         car_id=model.car_id,
@@ -69,6 +67,7 @@ class RentalRepository(IRentalRepository):
         try:
             query = select(RentalModel).filter(RentalModel.car_id == car_id, RentalModel.end_date == None)
             result = await self.db.execute(query)
-            return _to_entity(result.scalars().first())
+            model = result.scalars().first()
+            return _to_entity(model) if model else None
         except SQLAlchemyError as e:
             raise DatabaseException(f"Error retrieving active rental for car {car_id}: {e}", original_exception=e)

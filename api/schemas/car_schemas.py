@@ -7,7 +7,6 @@ from domain.entities.car import CarStatus
 class CarCreate(BaseModel):
     model: str = Field(..., min_length=2)
     year: int = Field(..., ge=1950, json_schema_extra={"example": 2000})
-    status: Optional[CarStatus] = CarStatus.AVAILABLE
 
 class CarResponse(BaseModel):
     id: UUID
